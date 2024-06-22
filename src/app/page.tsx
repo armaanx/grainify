@@ -6,8 +6,8 @@ export default function Home() {
   return (
     <MaxWidthWrapper>
       <div className="min-h-screen z-10 flex flex-col items-center justify-center p-4 text-center gap-8 ">
-        <div className="max-w-7xl flex flex-col items-center justify-center gap-y-8">
-          <h1 className="text-5xl md:text-7xl font-bold max-w-3xl">
+        <div className="max-w-7xl flex flex-col items-center justify-center gap-y-8 z-10">
+          <h1 className="text-5xl md:text-7xl font-bold max-w-3xl z-10">
             Add Vintage Charm to Your Photos
           </h1>
           <Button className="mt-5 w-30  font-bold text-md" size={"lg"}>
