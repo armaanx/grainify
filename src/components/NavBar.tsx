@@ -10,7 +10,9 @@ const NavBar = () => {
           <Link href={"/"} className="font-semibold text-2xl pl-2">
             Grainify
           </Link>
-          <ThemeToggle />
+          <div className="z-50">
+            <ThemeToggle />
+          </div>
         </div>
       </MaxWidthWrapper>
     </nav>
