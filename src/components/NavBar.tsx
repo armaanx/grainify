@@ -4,7 +4,7 @@ import ThemeToggle from "./ThemeToggle";
 
 const NavBar = () => {
   return (
-    <nav className="sticky top-0 z-50 border-b border-base-200 bg-inherit/5 backdrop-blur-lg ">
+    <nav className="sticky backdrop-blur-md  z-50 top-0 left-0 right-0 border-b  shadow-sm flex items-center justify-between ">
       <MaxWidthWrapper>
         <div className="flex items-center justify-between flex-wrap p-2">
           <Link href={"/"} className="font-semibold text-2xl pl-2">
