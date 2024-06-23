@@ -19,7 +19,7 @@ export default function Home() {
           <Link
             href={"/apply"}
             className={cn(
-              "mt-5 w-30  font-bold text-md",
+              "mt-1 w-30  font-bold text-md",
               buttonVariants({ size: "lg" })
             )}
           >

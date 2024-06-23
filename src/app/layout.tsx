@@ -21,7 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("grainy-light dark:bg-none", inter.className)}>
+      <body
+        className={cn("grainy-light dark:bg-none antialiased", inter.className)}
+      >
         <ThemeProvider attribute="class" defaultTheme="system">
           <NavBar />
           {children}
