@@ -24,7 +24,7 @@ const Page = () => {
     });
   };
   if (file) {
-    return <ImageProcessing file={file} />;
+    return <ImageProcessing file={file} fileNull={setFile} />;
   }
   return (
     <div className="flex flex-col items-center justify-center w-full  mx-auto space-y-4 h-screen ">
