@@ -9,12 +9,32 @@ import Dropzone from "react-dropzone";
 const Page = () => {
   const { toast } = useToast();
   const [isDrag, setIsDrag] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const onDropAccepted = (acceptedFiles: File[]) => {
-    setFile(acceptedFiles[0]);
-    setIsDrag(false);
-    console.log(acceptedFiles[0]);
-    console.log("Dropped");
+  //const [file, setFile] = useState<File | null>(null);
+  const [fileDataUrl, setFileDataUrl] = useState<string | null>(null);
+  const [imageBitmap, setImageBitmap] = useState<ImageBitmap | null>(null);
+  // const onDropAccepted = (acceptedFiles: File[]) => {
+  //   setFile(acceptedFiles[0]);
+  //   setIsDrag(false);
+  //   console.log(acceptedFiles[0]);
+  //   console.log("Dropped");
+  // };
+
+  const onDropAccepted = async (acceptedFiles: File[]) => {
+    // const reader = new FileReader();
+    // reader.onload = () => {
+    //   setFileDataUrl(reader.result as string);
+    //   //setFile(acceptedFiles[0]);
+    //   setIsDrag(false);
+    // };
+    // reader.readAsDataURL(acceptedFiles[0]);
+    const file = acceptedFiles[0];
+    if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      setFileDataUrl(objectUrl);
+      const imageBitmap = await createImageBitmap(file);
+      setImageBitmap(imageBitmap);
+      setIsDrag(false);
+    }
   };
   const onDropRejected = () => {
     toast({
@@ -23,8 +43,14 @@ const Page = () => {
       variant: "destructive",
     });
   };
-  if (file) {
-    return <ImageProcessing file={file} fileNull={setFile} />;
+  if (fileDataUrl) {
+    return (
+      <ImageProcessing
+        file={fileDataUrl}
+        fileNull={setFileDataUrl}
+        bitmap={imageBitmap}
+      />
+    );
   }
   return (
     <div className="flex flex-col items-center justify-center w-full  mx-auto space-y-4 h-screen ">
