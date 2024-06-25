@@ -165,7 +165,7 @@
 // export default ImageProcessing;
 
 //ignore commented codes, the project is wip
-
+"use client";
 import useDebounce from "@/lib/useDebounce";
 import useWindow from "@/lib/useWindow";
 import { cn } from "@/lib/utils";
