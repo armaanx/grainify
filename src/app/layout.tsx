@@ -1,18 +1,14 @@
+import NavBar from "@/components/NavBar";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
+import { cn, constructMetadata } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import NavBar from "@/components/NavBar";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { cn } from "@/lib/utils";
-import { Toast } from "@/components/ui/toast";
-import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Grainify",
-  description: "Add grain to your images",
-};
+export const metadata: Metadata = constructMetadata();
 
 export default function RootLayout({
   children,
