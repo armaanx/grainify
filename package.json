@@ -16,6 +16,7 @@
     "@radix-ui/react-toast": "^1.2.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "file-saver": "^2.0.5",
     "framer-motion": "^11.2.11",
     "lucide-react": "^0.396.0",
     "mini-svg-data-uri": "^1.4.4",
@@ -26,11 +27,13 @@
     "react-dropzone": "^14.2.3",
     "react-resizable-panels": "^2.0.19",
     "shadcn-ui": "^0.8.0",
+    "sharp": "^0.33.4",
     "streamsaver": "^2.0.6",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
