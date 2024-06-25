@@ -269,6 +269,7 @@ const ImageProcessing = ({ file, fileNull, bitmap }: ImageProcessingProps) => {
 
     try {
       const blob = await new Promise<Blob>((resolve) =>
+        //@ts-ignore
         canvasRef.current!.toBlob(resolve, "image/jpeg", 0.8)
       );
 
@@ -288,7 +289,7 @@ const ImageProcessing = ({ file, fileNull, bitmap }: ImageProcessingProps) => {
       // Legacy way
       const writer = fileStream.getWriter();
       const reader = readableStream.getReader();
-      const pump = () =>
+      const pump: any = () =>
         reader
           .read()
           .then((res) =>
