@@ -171,7 +171,6 @@ import useWindow from "@/lib/useWindow";
 import { cn } from "@/lib/utils";
 import { Download, Undo2 } from "lucide-react";
 import { default as NextImage } from "next/image";
-import * as streamSaver from "streamsaver";
 import React, {
   useCallback,
   useEffect,
@@ -187,6 +186,7 @@ import {
   ResizablePanelGroup,
 } from "./ui/resizable";
 import { Slider } from "./ui/slider";
+import { saveAs } from "file-saver";
 
 interface ImageProcessingProps {
   file: string;
@@ -263,44 +263,16 @@ const ImageProcessing = ({ file, fileNull, bitmap }: ImageProcessingProps) => {
   //   link.click();
   //   document.body.removeChild(link);
   // }, []);
-
-  const handleDownload = useCallback(async () => {
+  const handleDownload = useCallback(() => {
     if (!canvasRef.current) return;
-
-    try {
-      const blob = await new Promise<Blob>((resolve) =>
-        //@ts-ignore
-        canvasRef.current!.toBlob(resolve, "image/jpeg", 0.8)
-      );
-
-      const fileName = new Date().getTime() + ".jpeg";
-
-      const fileStream = streamSaver.createWriteStream(fileName, {
-        size: blob.size, // (optional) Will show progress
-      });
-
-      const readableStream = blob.stream();
-
-      // More optimized way using native streams if supported
-      if (window.WritableStream && readableStream.pipeTo) {
-        return readableStream.pipeTo(fileStream);
-      }
-
-      // Legacy way
-      const writer = fileStream.getWriter();
-      const reader = readableStream.getReader();
-      const pump: any = () =>
-        reader
-          .read()
-          .then((res) =>
-            res.done ? writer.close() : writer.write(res.value).then(pump)
-          );
-
-      pump();
-    } catch (error) {
-      console.error("Download failed:", error);
-      // Handle the error (e.g., show a user-friendly message)
-    }
+    const fileName = new Date().getTime().toString() + ".jpeg";
+    canvasRef.current.toBlob(
+      (blob) => {
+        saveAs(blob!, fileName);
+      },
+      "image/jpeg",
+      0.8
+    );
   }, []);
 
   const handleSliderChange = useDebounce((value: number[]) => {
