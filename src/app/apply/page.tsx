@@ -9,24 +9,9 @@ import Dropzone from "react-dropzone";
 const Page = () => {
   const { toast } = useToast();
   const [isDrag, setIsDrag] = useState(false);
-  //const [file, setFile] = useState<File | null>(null);
   const [fileDataUrl, setFileDataUrl] = useState<string | null>(null);
   const [imageBitmap, setImageBitmap] = useState<ImageBitmap | null>(null);
-  // const onDropAccepted = (acceptedFiles: File[]) => {
-  //   setFile(acceptedFiles[0]);
-  //   setIsDrag(false);
-  //   console.log(acceptedFiles[0]);
-  //   console.log("Dropped");
-  // };
-
   const onDropAccepted = async (acceptedFiles: File[]) => {
-    // const reader = new FileReader();
-    // reader.onload = () => {
-    //   setFileDataUrl(reader.result as string);
-    //   //setFile(acceptedFiles[0]);
-    //   setIsDrag(false);
-    // };
-    // reader.readAsDataURL(acceptedFiles[0]);
     const file = acceptedFiles[0];
     if (file) {
       const objectUrl = URL.createObjectURL(file);

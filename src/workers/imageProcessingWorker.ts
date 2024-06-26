@@ -10,7 +10,6 @@ self.onmessage = (e: MessageEvent) => {
     data[i] = Math.min(255, Math.max(0, data[i] + grain)); // Red
     data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + grain)); // Green
     data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + grain)); // Blue
-    // Alpha channel remains unchanged
   }
 
   self.postMessage({
