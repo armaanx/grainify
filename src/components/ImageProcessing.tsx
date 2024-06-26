@@ -19,7 +19,15 @@ import {
   ResizablePanelGroup,
 } from "./ui/resizable";
 import { Slider } from "./ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { saveAs } from "file-saver";
+import { useToast } from "./ui/use-toast";
 
 interface ImageProcessingProps {
   file: string;
@@ -29,20 +37,41 @@ interface ImageProcessingProps {
 
 const WIDTH = 768;
 
-const ImageProcessing = ({ file, fileNull, bitmap }: ImageProcessingProps) => {
+type GrainType = "monochrome" | "color";
+
+const ImageProcessing: React.FC<ImageProcessingProps> = ({
+  file,
+  fileNull,
+  bitmap,
+}) => {
   const [sliderVal, setSliderVal] = useState(0);
+  const [grainType, setGrainType] = useState<GrainType>("monochrome");
   const width = useWindow();
   const [imageData, setImageData] = useState<ImageData | null>(null);
   const [outputImageUrl, setOutputImageUrl] = useState<string | null>(file);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const workerRef = useRef<Worker | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
+  // Initialize worker
   useEffect(() => {
     workerRef.current = new Worker(
       new URL("../workers/imageProcessingWorker.ts", import.meta.url)
     );
-    workerRef.current.onmessage = (e: MessageEvent) => {
+
+    // Cleanup function
+    return () => {
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
+  }, []);
+
+  // Set up worker message handler
+  useEffect(() => {
+    if (!workerRef.current) return;
+
+    const handleWorkerMessage = (e: MessageEvent) => {
       const { processedData } = e.data;
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d", {
@@ -51,18 +80,30 @@ const ImageProcessing = ({ file, fileNull, bitmap }: ImageProcessingProps) => {
       });
       if (canvas && ctx) {
         ctx.putImageData(processedData, 0, 0);
-        setOutputImageUrl(canvas.toDataURL("image/jpeg", 0.8));
+        const newImageUrl = canvas.toDataURL("image/jpeg", 0.8);
+        setOutputImageUrl((prevUrl) => {
+          if (prevUrl && prevUrl !== file) {
+            URL.revokeObjectURL(prevUrl);
+          }
+          return newImageUrl;
+        });
         setIsProcessing(false);
       }
     };
 
-    return () => {
-      workerRef.current?.terminate();
-    };
-  }, []);
+    workerRef.current.onmessage = handleWorkerMessage;
 
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.onmessage = null;
+      }
+    };
+  }, [file]);
+
+  // Initialize canvas with bitmap
   useEffect(() => {
     if (!bitmap) return;
+
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d", {
       desynchronized: true,
@@ -76,31 +117,63 @@ const ImageProcessing = ({ file, fileNull, bitmap }: ImageProcessingProps) => {
     }
   }, [bitmap]);
 
+  // Cleanup output image URL
+  useEffect(() => {
+    return () => {
+      if (outputImageUrl && outputImageUrl !== file) {
+        URL.revokeObjectURL(outputImageUrl);
+      }
+    };
+  }, [outputImageUrl, file]);
+
   const applyGrain = useCallback(
-    (amount: number) => {
+    (amount: number, type: GrainType) => {
       if (!imageData || !workerRef.current || isProcessing) return;
 
       setIsProcessing(true);
-      workerRef.current.postMessage({ imageData, amount });
+      workerRef.current.postMessage({ imageData, amount, grainType: type });
     },
     [imageData, isProcessing]
   );
+
   const handleDownload = useCallback(() => {
-    if (!canvasRef.current) return;
-    const fileName = new Date().getTime().toString() + ".jpeg";
-    canvasRef.current.toBlob(
-      (blob) => {
-        saveAs(blob!, fileName);
-      },
-      "image/jpeg",
-      0.8
-    );
-  }, []);
+    try {
+      if (!canvasRef.current) {
+        throw new Error("Canvas reference is null");
+      }
+      const fileName = new Date().getTime().toString() + ".jpeg";
+      canvasRef.current.toBlob(
+        (blob) => {
+          if (blob) {
+            saveAs(blob, fileName);
+          } else {
+            throw new Error("Failed to create blob from canvas");
+          }
+        },
+        "image/jpeg",
+        0.8
+      );
+    } catch (e) {
+      toast({
+        title: "Error occurred while downloading",
+        description: "Try right clicking and saving the image",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   const handleSliderChange = useDebounce((value: number[]) => {
     setSliderVal(value[0]);
-    applyGrain(value[0]);
+    applyGrain(value[0], grainType);
   }, 500);
+
+  const handleGrainTypeChange = useCallback(
+    (value: GrainType) => {
+      setGrainType(value);
+      applyGrain(sliderVal, value);
+    },
+    [sliderVal, applyGrain]
+  );
 
   const isVertical = useMemo(() => width! < WIDTH, [width]);
 
@@ -138,7 +211,7 @@ const ImageProcessing = ({ file, fileNull, bitmap }: ImageProcessingProps) => {
         <ResizableHandle withHandle={!isVertical} disabled={isVertical} />
         <ResizablePanel
           defaultSize={30}
-          maxSize={isVertical ? 25 : 40}
+          maxSize={isVertical ? 30 : 40}
           minSize={isVertical ? 25 : 0}
           className={cn(
             "flex items-center justify-center flex-col gap-2 md:gap-8 p-2",
@@ -146,6 +219,18 @@ const ImageProcessing = ({ file, fileNull, bitmap }: ImageProcessingProps) => {
           )}
         >
           <div className="flex flex-col gap-4 w-full p-5">
+            <div className="flex flex-row w-full items-center justify-between">
+              <Label>Grain Type</Label>
+              <Select onValueChange={handleGrainTypeChange} value={grainType}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select grain type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monochrome">Monochrome</SelectItem>
+                  <SelectItem value="color">Color</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex flex-row w-full items-center justify-between">
               <Label>Intensity</Label>
               <Label>{sliderVal}</Label>
@@ -175,7 +260,7 @@ const ImageProcessing = ({ file, fileNull, bitmap }: ImageProcessingProps) => {
                 className="w-fit font-semibold"
                 onClick={() => fileNull(null)}
               >
-                <Undo2 className="w-5 h-5  " />
+                <Undo2 className="w-5 h-5" />
               </Button>
             </div>
           </div>
