@@ -218,11 +218,15 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
             isVertical ? "min-h-[150px]" : "min-w-[200px] lg:min-w-[300px]"
           )}
         >
-          <div className="flex flex-col gap-4 w-full p-5">
+          <div className="flex flex-col gap-3 xs:gap-5 md:gap-7 w-full p-5">
             <div className="flex flex-row w-full items-center justify-between">
               <Label>Grain Type</Label>
-              <Select onValueChange={handleGrainTypeChange} value={grainType}>
-                <SelectTrigger className="w-[180px]">
+              <Select
+                disabled={isProcessing}
+                onValueChange={handleGrainTypeChange}
+                value={grainType}
+              >
+                <SelectTrigger className="w-[135px] h-8">
                   <SelectValue placeholder="Select grain type" />
                 </SelectTrigger>
                 <SelectContent>
