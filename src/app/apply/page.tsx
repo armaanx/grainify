@@ -3,7 +3,7 @@ import ImageProcessing from "@/components/ImageProcessing";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { UploadIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 
 const Page = () => {
@@ -11,6 +11,15 @@ const Page = () => {
   const [isDrag, setIsDrag] = useState(false);
   const [fileDataUrl, setFileDataUrl] = useState<string | null>(null);
   const [imageBitmap, setImageBitmap] = useState<ImageBitmap | null>(null);
+  useEffect(() => {
+    if (fileDataUrl) {
+      return () => {
+        URL.revokeObjectURL(fileDataUrl);
+        setFileDataUrl(null);
+        setImageBitmap(null);
+      };
+    }
+  }, [fileDataUrl]);
   const onDropAccepted = async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
