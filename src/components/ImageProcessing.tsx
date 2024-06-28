@@ -1,9 +1,11 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import useDebounce from "@/lib/useDebounce";
 import useWindow from "@/lib/useWindow";
 import { cn } from "@/lib/utils";
-import { Download, Undo2 } from "lucide-react";
+import { Download, Undo2, ZoomIn, ZoomOut } from "lucide-react";
 import { default as NextImage } from "next/image";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import React, {
   useCallback,
   useEffect,
@@ -126,6 +128,10 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
     };
   }, [outputImageUrl, file]);
 
+  // const handleZoomStop = useCallback((ref: any) => {
+  //   ref.centerView(1);
+  // }, []);
+
   const applyGrain = useCallback(
     (amount: number, type: GrainType) => {
       if (!imageData || !workerRef.current || isProcessing) return;
@@ -178,7 +184,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
   const isVertical = useMemo(() => width! < WIDTH, [width]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen w-full mx-auto p-5">
+    <div className="flex items-center justify-center min-h-screen w-full mx-auto p-5 relative">
       <ResizablePanelGroup
         direction={isVertical ? "vertical" : "horizontal"}
         className={cn(
@@ -195,13 +201,84 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
             isVertical ? "min-h-[200px] xs:min-h-[500px]" : "h-[600px]"
           )}
         >
-          <NextImage
-            src={outputImageUrl || file}
-            alt="Uploaded Image"
-            className="p-1.5 object-contain"
-            priority
-            fill
-          />
+          <TransformWrapper
+            initialScale={1}
+            minScale={0.5}
+            maxScale={5}
+            limitToBounds={true}
+            doubleClick={{ disabled: true }}
+            //onZoomStop={handleZoomStop}
+            disabled={isProcessing}
+            wheel={{ touchPadDisabled: true, disabled: false }}
+            //pinch={{ disabled: true }}
+          >
+            {({ zoomIn, zoomOut, resetTransform }) => (
+              <>
+                <div className="absolute bottom-2 right-2  z-10 flex gap-1">
+                  <Button
+                    size={"sm"}
+                    variant={"outline"}
+                    onClick={() => zoomIn()}
+                  >
+                    <ZoomIn className="w-4 h-4  md:h-5 md:w-5" />
+                  </Button>
+                  <Button
+                    size={"sm"}
+                    variant={"outline"}
+                    onClick={() => zoomOut()}
+                  >
+                    <ZoomOut className="w-4 h-4 md:h-5 md:w-5" />
+                  </Button>
+                  <Button
+                    size={"sm"}
+                    variant={"outline"}
+                    onClick={() => resetTransform()}
+                    className=""
+                  >
+                    Reset
+                  </Button>
+                </div>
+                <TransformComponent
+                  wrapperStyle={{
+                    width: "100%",
+                    height: "100%",
+                  }}
+                  contentStyle={{
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  {/* <div
+                    className="cursor-grab"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      backgroundImage: `url(${outputImageUrl || file})`,
+                      backgroundSize: "contain",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  /> */}
+                  <div
+                    className={cn(
+                      "w-full cursor-grab",
+                      isVertical ? "h-[400px] 2xs:h-[550px]" : "h-full"
+                    )}
+                  >
+                    <img
+                      src={outputImageUrl || file}
+                      alt="Processed Image"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+                </TransformComponent>
+              </>
+            )}
+          </TransformWrapper>
           {isProcessing && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
               <p className="text-white">Processing...</p>
