@@ -3,9 +3,16 @@
 import useDebounce from "@/lib/useDebounce";
 import useWindow from "@/lib/useWindow";
 import { cn } from "@/lib/utils";
-import { Download, Undo2, ZoomIn, ZoomOut } from "lucide-react";
-import { default as NextImage } from "next/image";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { saveAs } from "file-saver";
+import {
+  Download,
+  Eye,
+  EyeOff,
+  Shrink,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
 import React, {
   useCallback,
   useEffect,
@@ -13,6 +20,8 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import TooltipComponent from "./ToolTipComponent";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import {
@@ -20,7 +29,6 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "./ui/resizable";
-import { Slider } from "./ui/slider";
 import {
   Select,
   SelectContent,
@@ -28,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { saveAs } from "file-saver";
+import { Slider } from "./ui/slider";
 import { useToast } from "./ui/use-toast";
 
 interface ImageProcessingProps {
@@ -55,6 +63,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
   const workerRef = useRef<Worker | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const [isPreview, setIsPreview] = useState(false);
 
   // Initialize worker
   useEffect(() => {
@@ -128,10 +137,6 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
     };
   }, [outputImageUrl, file]);
 
-  // const handleZoomStop = useCallback((ref: any) => {
-  //   ref.centerView(1);
-  // }, []);
-
   const applyGrain = useCallback(
     (amount: number, type: GrainType) => {
       if (!imageData || !workerRef.current || isProcessing) return;
@@ -169,12 +174,24 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
   }, [toast]);
 
   const handleSliderChange = useDebounce((value: number[]) => {
+    if (value[0] === 0) {
+      setIsPreview(false);
+      setOutputImageUrl(file);
+      return;
+    }
+    setIsPreview(false);
     setSliderVal(value[0]);
     applyGrain(value[0], grainType);
   }, 500);
 
   const handleGrainTypeChange = useCallback(
     (value: GrainType) => {
+      if (sliderVal === 0) {
+        setIsPreview(false);
+        setGrainType(value);
+        return;
+      }
+      setIsPreview(false);
       setGrainType(value);
       applyGrain(sliderVal, value);
     },
@@ -201,10 +218,38 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
             isVertical ? "min-h-[200px] xs:min-h-[500px]" : "h-[600px]"
           )}
         >
+          <div className="absolute top-2 right-2 z-10">
+            <TooltipComponent content="Close Image">
+              <Button
+                variant={"outline"}
+                size={"sm"}
+                className="h-9 w-10 p-0"
+                onClick={() => fileNull(null)}
+              >
+                <X className="w-4 h-4 2xs:h-5 2xs:w-5" />
+              </Button>
+            </TooltipComponent>
+          </div>
+          <div className="absolute bottom-2 left-2 z-10">
+            <TooltipComponent content="Preview">
+              <Button
+                disabled={outputImageUrl === file || sliderVal === 0}
+                variant={"outline"}
+                size={"sm"}
+                onClick={() => setIsPreview((prev) => !prev)}
+              >
+                {isPreview ? (
+                  <EyeOff className="w-4 h-4 2xs:h-5 2xs:w-5" />
+                ) : (
+                  <Eye className="w-4 h-4 2xs:h-5 2xs:w-5" />
+                )}
+              </Button>
+            </TooltipComponent>
+          </div>
           <TransformWrapper
             initialScale={1}
             minScale={0.5}
-            maxScale={5}
+            maxScale={7}
             limitToBounds={true}
             doubleClick={{ disabled: true }}
             //onZoomStop={handleZoomStop}
@@ -214,29 +259,30 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
           >
             {({ zoomIn, zoomOut, resetTransform }) => (
               <>
-                <div className="absolute bottom-2 right-2  z-10 flex gap-1">
+                <div className="absolute bottom-2 right-2  z-10 flex flex-col md:flex-row gap-1 ">
                   <Button
                     size={"sm"}
                     variant={"outline"}
                     onClick={() => zoomIn()}
                   >
-                    <ZoomIn className="w-4 h-4  md:h-5 md:w-5" />
+                    <ZoomIn className="w-4 h-4  2xs:h-5 2xs:w-5" />
                   </Button>
                   <Button
                     size={"sm"}
                     variant={"outline"}
                     onClick={() => zoomOut()}
                   >
-                    <ZoomOut className="w-4 h-4 md:h-5 md:w-5" />
+                    <ZoomOut className="w-4 h-4 2xs:h-5 2xs:w-5" />
                   </Button>
-                  <Button
-                    size={"sm"}
-                    variant={"outline"}
-                    onClick={() => resetTransform()}
-                    className=""
-                  >
-                    Reset
-                  </Button>
+                  <TooltipComponent content="Fit in view">
+                    <Button
+                      size={"sm"}
+                      variant={"outline"}
+                      onClick={() => resetTransform()}
+                    >
+                      <Shrink className="w-4 h-4 2xs:h-5 2xs:w-5" />
+                    </Button>
+                  </TooltipComponent>
                 </div>
                 <TransformComponent
                   wrapperStyle={{
@@ -248,32 +294,33 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
                     height: "100%",
                   }}
                 >
-                  {/* <div
-                    className="cursor-grab"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      backgroundImage: `url(${outputImageUrl || file})`,
-                      backgroundSize: "contain",
-                      backgroundPosition: "center",
-                      backgroundRepeat: "no-repeat",
-                    }}
-                  /> */}
                   <div
                     className={cn(
                       "w-full cursor-grab",
                       isVertical ? "h-[400px] 2xs:h-[550px]" : "h-full"
                     )}
                   >
-                    <img
-                      src={outputImageUrl || file}
-                      alt="Processed Image"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
-                    />
+                    {isPreview ? (
+                      <img
+                        src={file}
+                        alt="Processed Image"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src={outputImageUrl || file}
+                        alt="Processed Image"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                        }}
+                      />
+                    )}
                   </div>
                 </TransformComponent>
               </>
@@ -295,7 +342,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
             isVertical ? "min-h-[150px]" : "min-w-[200px] lg:min-w-[300px]"
           )}
         >
-          <div className="flex flex-col gap-3 xs:gap-5 md:gap-7 w-full p-5">
+          <div className="flex flex-col gap-3 2xs:gap-5 md:gap-7 w-full p-5">
             <div className="flex flex-row w-full items-center justify-between">
               <Label>Grain Type</Label>
               <Select
@@ -327,22 +374,18 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
               step={1}
               disabled={isProcessing}
             />
-            <div className="flex flex-row w-full items-center justify-center gap-5 pt-4">
-              <Button
-                size="sm"
-                className="w-fit font-semibold"
-                onClick={handleDownload}
-                disabled={isProcessing}
-              >
-                <Download className="w-5 h-5" />
-              </Button>
-              <Button
-                size={"sm"}
-                className="w-fit font-semibold"
-                onClick={() => fileNull(null)}
-              >
-                <Undo2 className="w-5 h-5" />
-              </Button>
+            <div className="flex flex-row w-full items-center justify-center gap-5">
+              <TooltipComponent content="Download" side="bottom">
+                <Button
+                  size="sm"
+                  variant={"outline"}
+                  className="p-4 font-semibold"
+                  onClick={handleDownload}
+                  disabled={isProcessing}
+                >
+                  <Download className="w-4 h-4 2xs:h-5 2xs:w-5" />
+                </Button>
+              </TooltipComponent>
             </div>
           </div>
         </ResizablePanel>
