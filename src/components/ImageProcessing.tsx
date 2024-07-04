@@ -8,6 +8,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  Settings,
   Shrink,
   X,
   ZoomIn,
@@ -38,6 +39,16 @@ import {
 } from "./ui/select";
 import { Slider } from "./ui/slider";
 import { useToast } from "./ui/use-toast";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
 interface ImageProcessingProps {
   file: string;
@@ -48,6 +59,13 @@ interface ImageProcessingProps {
 const WIDTH = 768;
 
 type GrainType = "monochrome" | "color";
+
+type ImageType = "image/jpeg" | "image/png";
+
+type ImageQuality = {
+  value: 0.5 | 0.8 | 1;
+  quality: "low" | "medium" | "high";
+};
 
 const ImageProcessing: React.FC<ImageProcessingProps> = ({
   file,
@@ -64,6 +82,12 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   const [isPreview, setIsPreview] = useState(false);
+  const [outputImageType, setOutputImageType] =
+    useState<ImageType>("image/jpeg");
+  const [outputImageQuality, setOutputImageQuality] = useState<ImageQuality>({
+    quality: "medium",
+    value: 0.8,
+  });
 
   // Initialize worker
   useEffect(() => {
@@ -147,12 +171,12 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
     [imageData, isProcessing]
   );
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = () => {
     try {
       if (!canvasRef.current) {
         throw new Error("Canvas reference is null");
       }
-      const fileName = new Date().getTime().toString() + ".jpeg";
+      const fileName = "grainify" + "_" + new Date().getTime().toString();
       canvasRef.current.toBlob(
         (blob) => {
           if (blob) {
@@ -161,8 +185,8 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
             throw new Error("Failed to create blob from canvas");
           }
         },
-        "image/jpeg",
-        0.8
+        outputImageType,
+        outputImageQuality.value
       );
     } catch (e) {
       toast({
@@ -171,7 +195,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
         variant: "destructive",
       });
     }
-  }, [toast]);
+  };
 
   const handleSliderChange = useDebounce((value: number[]) => {
     if (value[0] === 0) {
@@ -374,17 +398,109 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
               step={1}
               disabled={isProcessing}
             />
-            <div className="flex flex-row w-full items-center justify-center gap-5">
+            <div className="flex flex-row w-full items-center justify-center gap-1">
               <TooltipComponent content="Download" side="bottom">
                 <Button
                   size="sm"
                   variant={"outline"}
                   className="p-4 font-semibold"
                   onClick={handleDownload}
-                  disabled={isProcessing}
+                  disabled={isProcessing || sliderVal === 0}
                 >
                   <Download className="w-4 h-4 2xs:h-5 2xs:w-5" />
                 </Button>
+              </TooltipComponent>
+              <TooltipComponent content="Download Settings" side="bottom">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant={"outline"} size="sm" className="p-4">
+                      <Settings className="w-4 h-4 2xs:h-5 2xs:w-5" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="w-[360px] md:w-[420px] rounded-md">
+                    <DialogHeader className="text-left">
+                      <DialogTitle>Export Settings</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-4 w-full items-center justify-center">
+                      <div className="flex flex-row w-full items-center justify-between mt-6">
+                        <Label>Image Type</Label>
+                        <Select
+                          value={outputImageType}
+                          onValueChange={(e) => {
+                            if (e === "image/jpeg") {
+                              setOutputImageType("image/jpeg");
+                            } else if (e === "image/png") {
+                              setOutputImageType("image/png");
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Select image type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="image/jpeg">JPEG</SelectItem>
+                            <SelectItem value="image/png">PNG</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex flex-row w-full items-center justify-between">
+                        <Label>Image Quality</Label>
+                        <Select
+                          disabled={outputImageType == "image/png"}
+                          value={
+                            outputImageType == "image/png"
+                              ? "high"
+                              : outputImageQuality.quality
+                          }
+                          onValueChange={(e) => {
+                            if (outputImageType == "image/png") {
+                              setOutputImageQuality({
+                                quality: "high",
+                                value: 1,
+                              });
+                              return;
+                            }
+                            if (e === "low") {
+                              setOutputImageQuality({
+                                quality: "low",
+                                value: 0.5,
+                              });
+                            } else if (e === "medium") {
+                              setOutputImageQuality({
+                                quality: "medium",
+                                value: 0.8,
+                              });
+                            } else if (e === "high") {
+                              setOutputImageQuality({
+                                quality: "high",
+                                value: 1,
+                              });
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Select image quality" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button
+                          variant={"secondary"}
+                          className="w-fit font-semibold"
+                        >
+                          Close
+                        </Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </TooltipComponent>
             </div>
           </div>
