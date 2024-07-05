@@ -72,6 +72,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
   fileNull,
   bitmap,
 }) => {
+  const [isGrayscale, setIsGrayscale] = useState(false);
   const [sliderVal, setSliderVal] = useState(0);
   const [grainType, setGrainType] = useState<GrainType>("monochrome");
   const width = useWindow();
@@ -161,15 +162,17 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
     };
   }, [outputImageUrl, file]);
 
-  const applyGrain = useCallback(
-    (amount: number, type: GrainType) => {
-      if (!imageData || !workerRef.current || isProcessing) return;
+  const applyGrain = (amount: number, type: GrainType, grayscale: boolean) => {
+    if (!imageData || !workerRef.current || isProcessing) return;
 
-      setIsProcessing(true);
-      workerRef.current.postMessage({ imageData, amount, grainType: type });
-    },
-    [imageData, isProcessing]
-  );
+    setIsProcessing(true);
+    workerRef.current.postMessage({
+      imageData,
+      amount,
+      grainType: type,
+      grayscale,
+    });
+  };
 
   const handleDownload = () => {
     try {
@@ -198,29 +201,39 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
   };
 
   const handleSliderChange = useDebounce((value: number[]) => {
-    if (value[0] === 0) {
+    if (value[0] === 0 && !isGrayscale) {
       setIsPreview(false);
       setOutputImageUrl(file);
       return;
     }
     setIsPreview(false);
     setSliderVal(value[0]);
-    applyGrain(value[0], grainType);
+    applyGrain(value[0], grainType, isGrayscale);
   }, 500);
 
-  const handleGrainTypeChange = useCallback(
-    (value: GrainType) => {
-      if (sliderVal === 0) {
-        setIsPreview(false);
-        setGrainType(value);
-        return;
-      }
+  const handleGrainTypeChange = (value: GrainType) => {
+    if (sliderVal === 0) {
       setIsPreview(false);
       setGrainType(value);
-      applyGrain(sliderVal, value);
-    },
-    [sliderVal, applyGrain]
-  );
+      return;
+    }
+    setIsPreview(false);
+    setGrainType(value);
+    applyGrain(sliderVal, value, isGrayscale);
+  };
+
+  const handleGrayscale = () => {
+    setIsGrayscale((prevIsGrayscale) => {
+      setIsPreview(false);
+      const newIsGrayscale = !prevIsGrayscale;
+      if (sliderVal === 0 && newIsGrayscale === false) {
+        setOutputImageUrl(file);
+        return newIsGrayscale;
+      }
+      applyGrain(sliderVal, grainType, newIsGrayscale);
+      return newIsGrayscale;
+    });
+  };
 
   const isVertical = useMemo(() => width! < WIDTH, [width]);
 
@@ -230,7 +243,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
         direction={isVertical ? "vertical" : "horizontal"}
         className={cn(
           "max-w-6xl border-[1px] shadow-sm rounded-lg bg-white dark:bg-background",
-          isVertical ? "min-h-[550px] 2xs:min-h-[800px]" : "min-h-[600px]"
+          isVertical ? "min-h-[590px] 2xs:min-h-[800px]" : "min-h-[600px]"
         )}
       >
         <ResizablePanel
@@ -257,7 +270,9 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
           <div className="absolute bottom-2 left-2 z-10">
             <TooltipComponent content="Preview">
               <Button
-                disabled={outputImageUrl === file || sliderVal === 0}
+                disabled={
+                  outputImageUrl === file || (sliderVal === 0 && !isGrayscale)
+                }
                 variant={"outline"}
                 size={"sm"}
                 onClick={() => setIsPreview((prev) => !prev)}
@@ -367,6 +382,27 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
           )}
         >
           <div className="flex flex-col gap-3 2xs:gap-5 md:gap-7 w-full p-5">
+            {!isGrayscale ? (
+              <Button
+                size={"sm"}
+                variant={"outline"}
+                onClick={() => {
+                  handleGrayscale();
+                }}
+              >
+                Convert to Grayscale
+              </Button>
+            ) : (
+              <Button
+                size={"sm"}
+                variant={"outline"}
+                onClick={() => {
+                  handleGrayscale();
+                }}
+              >
+                Undo Convert to Grayscale
+              </Button>
+            )}
             <div className="flex flex-row w-full items-center justify-between">
               <Label>Grain Type</Label>
               <Select
@@ -405,7 +441,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
                   variant={"outline"}
                   className="p-4 font-semibold"
                   onClick={handleDownload}
-                  disabled={isProcessing || sliderVal === 0}
+                  disabled={isProcessing || (sliderVal === 0 && !isGrayscale)}
                 >
                   <Download className="w-4 h-4 2xs:h-5 2xs:w-5" />
                 </Button>
