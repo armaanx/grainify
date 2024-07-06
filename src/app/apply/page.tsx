@@ -47,44 +47,46 @@ const Page = () => {
     );
   }
   return (
-    <div className="flex flex-col items-center justify-center w-full  mx-auto space-y-4 h-screen ">
-      <Dropzone
-        onDragEnter={() => setIsDrag(true)}
-        onDragLeave={() => setIsDrag(false)}
-        onDropRejected={onDropRejected}
-        onDropAccepted={onDropAccepted}
-        accept={{
-          "image/png": [".png"],
-          "image/jpg": [".jpg"],
-          "image/jpeg": [".jpeg"],
-        }}
-      >
-        {({ getRootProps, getInputProps }) => (
-          <div
-            className={cn(
-              "flex flex-col items-center justify-center gap-8  ",
-              isDrag &&
-                "border-8 rounded-lg border-blue-500 border-opacity-80 bg-blue-200/30 dark:bg-blue-400/20"
-            )}
-            {...getRootProps()}
-          >
-            <input {...getInputProps()} />
+    <div className="container mx-auto max-w-7xl   ">
+      <div className="flex flex-col items-center justify-center w-full  space-y-4 min-h-[calc(100vh-150px)]">
+        <Dropzone
+          onDragEnter={() => setIsDrag(true)}
+          onDragLeave={() => setIsDrag(false)}
+          onDropRejected={onDropRejected}
+          onDropAccepted={onDropAccepted}
+          accept={{
+            "image/png": [".png"],
+            "image/jpg": [".jpg"],
+            "image/jpeg": [".jpeg"],
+          }}
+        >
+          {({ getRootProps, getInputProps }) => (
             <div
-              className={
-                "flex flex-col items-center justify-center w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] lg:w-[650px] lg:h-[650px] text-sm text-center md:text-lg px-8 py-8 border-2 border-dashed rounded-lg cursor-pointer dark:border-muted"
-              }
+              className={cn(
+                "flex flex-col items-center justify-center gap-8 bg-background ",
+                isDrag &&
+                  "border-8 rounded-lg border-blue-500 border-opacity-80 bg-blue-200/30 dark:bg-blue-400/20"
+              )}
+              {...getRootProps()}
             >
-              <UploadIcon className="w-8 h-8 mb-2 text-foreground" />
-              <p className="text-foreground font-semibold">
-                Drag and drop your image here or click to select a file.
-              </p>
-              <p className="text-muted-foreground text-xs md:text-sm mt-4 font-medium">
-                PNG, JPG, and JPEG are supported.
-              </p>
+              <input {...getInputProps()} />
+              <div
+                className={
+                  "flex flex-col items-center justify-center w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] lg:w-[650px] lg:h-[650px] text-sm text-center md:text-lg px-8 py-8 border-2 border-dashed rounded-lg cursor-pointer dark:border-muted"
+                }
+              >
+                <UploadIcon className="w-8 h-8 mb-2 text-foreground" />
+                <p className="text-foreground font-semibold">
+                  Drag and drop your image here or click to select a file.
+                </p>
+                <p className="text-muted-foreground text-xs md:text-sm mt-4 font-medium">
+                  PNG, JPG, and JPEG are supported.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
-      </Dropzone>
+          )}
+        </Dropzone>
+      </div>
     </div>
   );
 };
