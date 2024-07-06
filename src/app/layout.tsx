@@ -1,14 +1,14 @@
+import Footer from "@/components/Footer";
 import NavBar from "@/components/NavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { cn, constructMetadata } from "@/lib/utils";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
-import Footer from "@/components/Footer";
+import type { Metadata } from "next";
+import { Sora } from "next/font/google";
+import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Sora({ subsets: ["latin"] });
 
 export const metadata: Metadata = constructMetadata();
 
