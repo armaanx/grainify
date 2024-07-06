@@ -14,16 +14,19 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import TooltipComponent from "./ToolTipComponent";
 import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { Label } from "./ui/label";
 import {
   ResizableHandle,
@@ -39,16 +42,6 @@ import {
 } from "./ui/select";
 import { Slider } from "./ui/slider";
 import { useToast } from "./ui/use-toast";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
 
 interface ImageProcessingProps {
   file: string;
@@ -384,6 +377,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
           <div className="flex flex-col gap-3 2xs:gap-5 md:gap-7 w-full p-5">
             {!isGrayscale ? (
               <Button
+                disabled={isProcessing}
                 size={"sm"}
                 variant={"outline"}
                 onClick={() => {
@@ -394,6 +388,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
               </Button>
             ) : (
               <Button
+                disabled={isProcessing}
                 size={"sm"}
                 variant={"outline"}
                 onClick={() => {
@@ -410,7 +405,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
                 onValueChange={handleGrainTypeChange}
                 value={grainType}
               >
-                <SelectTrigger className="w-[135px] h-8">
+                <SelectTrigger className="w-[140px] h-8">
                   <SelectValue placeholder="Select grain type" />
                 </SelectTrigger>
                 <SelectContent>
