@@ -34,12 +34,12 @@ export const BeforeAfterImage = () => {
 
   return (
     <div
-      className="w-full relative"
+      className="w-full relative "
       onMouseUp={handleInteractionEnd}
       onTouchEnd={handleInteractionEnd}
     >
       <div
-        className="relative w-full max-w-[700px] aspect-[70/45] m-auto overflow-hidden select-none"
+        className="relative w-full max-w-[900px] aspect-[70/45] m-auto overflow-hidden select-none rounded-lg"
         onMouseMove={handleMouseMove}
         onTouchMove={handleTouchMove}
         onMouseDown={handleInteractionStart}
@@ -48,7 +48,7 @@ export const BeforeAfterImage = () => {
         <Image alt="after" fill priority src="/homephoto2.jpg" />
 
         <div
-          className="absolute top-0 left-0 right-0 w-full max-w-[700px] aspect-[70/45] m-auto overflow-hidden select-none"
+          className="absolute top-0 left-0 right-0 w-full max-w-[900px] aspect-[70/45] m-auto overflow-hidden select-none"
           style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
         >
           <Image fill priority alt="before" src="/homephoto.jpg" />
