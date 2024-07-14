@@ -21,9 +21,9 @@ export default function Home() {
                 Add Vintage Charm to Your Images
               </h1>
               <p className="text-lg text-gray-700 dark:text-gray-300">
-                Elevate your visual content with our powerful grain effect tool.
-                Transform your images and bring a unique, vintage-inspired look
-                to your projects.
+                Elevate your visual content with our powerful vintage photo
+                editor. Transform your images and bring a unique,
+                vintage-inspired look to your projects.
               </p>
               <Link href={"/apply"} className={buttonVariants({ size: "lg" })}>
                 <span className="font-semibold">Try it out</span>{" "}
@@ -45,22 +45,23 @@ export default function Home() {
                   icon: (
                     <SquareMousePointer className="inline ml-4 align-middle" />
                   ),
-                  description: "Simple interface for quick edits",
+                  description: "Simple interface for quick edits.",
                 },
                 {
                   title: "High Quality",
                   icon: <ImageIcon className="inline ml-4 align-middle" />,
-                  description: "Preserve image quality while adding effects",
+                  description: "Preserve image quality while adding effects.",
                 },
                 {
                   title: "Customizable",
                   icon: <Wrench className="inline ml-4 align-middle" />,
-                  description: "Adjust grain intensity/type to your liking",
+                  description:
+                    "Choose from over 40+ filters that suit your needs. Adjust grain intensity/type to your liking.",
                 },
               ].map((feature, index) => (
                 <div
                   key={index}
-                  className="p-8 px-10 border rounded-lg shadow-sm bg-white  dark:bg-zinc-900/50 max-h-[150px]"
+                  className="pb-10 p-8 border rounded-lg shadow-sm bg-white  dark:bg-zinc-900/50 h-[180px] grid grid-flow-row justify-center items-center"
                 >
                   <h3 className="text-xl md:text-2xl font-semibold mb-2 text-black dark:text-white">
                     {feature.title}
