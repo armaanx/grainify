@@ -5,6 +5,8 @@ import useWindow from "@/lib/useWindow";
 import { cn } from "@/lib/utils";
 import { saveAs } from "file-saver";
 import {
+  ChevronLeft,
+  ChevronRight,
   Download,
   Eye,
   EyeOff,
@@ -14,7 +16,14 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import TooltipComponent from "./ToolTipComponent";
 import { Button } from "./ui/button";
@@ -22,6 +31,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -42,7 +52,7 @@ import {
 } from "./ui/select";
 import { Slider } from "./ui/slider";
 import { useToast } from "./ui/use-toast";
-
+import filters from "@/lib/filterFunctions";
 interface ImageProcessingProps {
   file: string;
   fileNull: React.Dispatch<React.SetStateAction<string | null>>;
@@ -65,7 +75,6 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
   fileNull,
   bitmap,
 }) => {
-  const [isGrayscale, setIsGrayscale] = useState(false);
   const [sliderVal, setSliderVal] = useState(0);
   const [grainType, setGrainType] = useState<GrainType>("monochrome");
   const width = useWindow();
@@ -82,6 +91,22 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
     quality: "medium",
     value: 0.8,
   });
+
+  const [num, setNum] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  });
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (isProcessing) return;
+    if (sliderVal === 0 && num == undefined) return;
+    if (e.key === "p") {
+      setIsPreview((prev) => !prev);
+    }
+  };
 
   // Initialize worker
   useEffect(() => {
@@ -155,17 +180,20 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
     };
   }, [outputImageUrl, file]);
 
-  const applyGrain = (amount: number, type: GrainType, grayscale: boolean) => {
-    if (!imageData || !workerRef.current || isProcessing) return;
+  const applyGrain = useCallback(
+    (amount: number, type: GrainType, num: number | undefined) => {
+      if (!imageData || !workerRef.current || isProcessing) return;
 
-    setIsProcessing(true);
-    workerRef.current.postMessage({
-      imageData,
-      amount,
-      grainType: type,
-      grayscale,
-    });
-  };
+      setIsProcessing(true);
+      workerRef.current.postMessage({
+        imageData: imageData,
+        amount,
+        grainType: type,
+        filterNum: num,
+      });
+    },
+    [imageData, isProcessing]
+  );
 
   const handleDownload = () => {
     try {
@@ -194,14 +222,14 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
   };
 
   const handleSliderChange = useDebounce((value: number[]) => {
-    if (value[0] === 0 && !isGrayscale) {
+    if (value[0] === 0 && num == undefined) {
       setIsPreview(false);
       setOutputImageUrl(file);
       return;
     }
     setIsPreview(false);
     setSliderVal(value[0]);
-    applyGrain(value[0], grainType, isGrayscale);
+    applyGrain(value[0], grainType, num);
   }, 500);
 
   const handleGrainTypeChange = (value: GrainType) => {
@@ -212,20 +240,18 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
     }
     setIsPreview(false);
     setGrainType(value);
-    applyGrain(sliderVal, value, isGrayscale);
+    applyGrain(sliderVal, value, num);
   };
 
-  const handleGrayscale = () => {
-    setIsGrayscale((prevIsGrayscale) => {
-      setIsPreview(false);
-      const newIsGrayscale = !prevIsGrayscale;
-      if (sliderVal === 0 && newIsGrayscale === false) {
-        setOutputImageUrl(file);
-        return newIsGrayscale;
-      }
-      applyGrain(sliderVal, grainType, newIsGrayscale);
-      return newIsGrayscale;
-    });
+  const handleFilterSelectChange = (value: string) => {
+    setIsPreview(false);
+    if (value === "None") {
+      setNum(undefined);
+      applyGrain(sliderVal, grainType, undefined);
+      return;
+    }
+    setNum(parseInt(value));
+    applyGrain(sliderVal, grainType, parseInt(value));
   };
 
   const isVertical = useMemo(() => width! < WIDTH, [width]);
@@ -264,7 +290,8 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
             <TooltipComponent content="Preview">
               <Button
                 disabled={
-                  outputImageUrl === file || (sliderVal === 0 && !isGrayscale)
+                  outputImageUrl === file ||
+                  (sliderVal === 0 && num == undefined)
                 }
                 variant={"outline"}
                 size={"sm"}
@@ -375,29 +402,29 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
           )}
         >
           <div className="flex flex-col gap-3 2xs:gap-5 md:gap-7 w-full p-5">
-            {!isGrayscale ? (
-              <Button
-                disabled={isProcessing}
-                size={"sm"}
-                variant={"outline"}
-                onClick={() => {
-                  handleGrayscale();
-                }}
-              >
-                Convert to Grayscale
-              </Button>
-            ) : (
-              <Button
-                disabled={isProcessing}
-                size={"sm"}
-                variant={"outline"}
-                onClick={() => {
-                  handleGrayscale();
-                }}
-              >
-                Undo Convert to Grayscale
-              </Button>
-            )}
+            <div className="flex flex-row w-full items-center justify-between">
+              <Label>Filter</Label>
+              <div className="flex flex-row items-center justify-center">
+                <Select
+                  value={num !== undefined ? num.toString() : "None"}
+                  disabled={isProcessing}
+                  onValueChange={handleFilterSelectChange}
+                >
+                  <SelectTrigger className="w-[180px] h-8  ">
+                    <SelectValue placeholder="Select filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="None">None</SelectItem>
+                    {filters.map((filter, index) => (
+                      <SelectItem key={index} value={index.toString()}>
+                        {filter.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="flex flex-row w-full items-center justify-between">
               <Label>Grain Type</Label>
               <Select
@@ -405,7 +432,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
                 onValueChange={handleGrainTypeChange}
                 value={grainType}
               >
-                <SelectTrigger className="w-[140px] h-8">
+                <SelectTrigger className="w-[180px] h-8">
                   <SelectValue placeholder="Select grain type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -436,7 +463,7 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
                   variant={"outline"}
                   className="p-4 font-semibold"
                   onClick={handleDownload}
-                  disabled={isProcessing || (sliderVal === 0 && !isGrayscale)}
+                  disabled={isProcessing || sliderVal === 0}
                 >
                   <Download className="w-4 h-4 2xs:h-5 2xs:w-5" />
                 </Button>
@@ -451,7 +478,11 @@ const ImageProcessing: React.FC<ImageProcessingProps> = ({
                   <DialogContent className="w-[360px] md:w-[420px] rounded-md">
                     <DialogHeader className="text-left">
                       <DialogTitle>Export Settings</DialogTitle>
+                      <DialogDescription>
+                        Configure Export Settings
+                      </DialogDescription>
                     </DialogHeader>
+
                     <div className="flex flex-col gap-4 w-full items-center justify-center">
                       <div className="flex flex-row w-full items-center justify-between mt-6">
                         <Label>Image Type</Label>
