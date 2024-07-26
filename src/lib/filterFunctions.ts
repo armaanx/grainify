@@ -32,16 +32,16 @@ import { pipe } from "instagram-filters/lib/utils/pipe";
 const polaroidSX70 = () =>
   pipe(
     colorFilter([255, 240, 220, 0.1]),
-    contrast(0.1),
-    saturation(-0.1),
-    brightness(0.05)
+    //contrast(0.1),
+    saturation(-0.1)
+    //brightness(0.05)
   );
 
 const kodakPortra400 = () =>
   pipe(
     colorFilter([255, 230, 210, 0.07]),
     saturation(-0.05),
-    contrast(0.05),
+    //contrast(0.05),
     rgbAdjust([1.05, 1, 0.95])
   );
 
@@ -49,7 +49,7 @@ const fujiSuperia400 = () =>
   pipe(
     colorFilter([220, 255, 245, 0.05]),
     saturation(0.1),
-    contrast(0.05),
+    //contrast(0.05),
     rgbAdjust([0.95, 1.05, 1.05])
   );
 
@@ -58,16 +58,15 @@ const kodakTriX = () => pipe(contrast(0.2), brightness(0.05), saturation(-1));
 const polaroid600 = () =>
   pipe(
     colorFilter([200, 255, 255, 0.1]),
-    contrast(0.15),
-    saturation(0.05),
-    brightness(0.05)
+    //contrast(0.15),
+    saturation(0.05)
+    //brightness(0.05)
   );
 
 const lomoColorNegative400 = () =>
-  pipe(saturation(0.2), contrast(0.1), colorFilter([255, 220, 180, 0.05]));
+  pipe(saturation(0.2), colorFilter([255, 220, 180, 0.05]));
 
-const ilfordHP5Plus = () =>
-  pipe(contrast(0.1), brightness(0.05), saturation(-1));
+const ilfordHP5Plus = () => pipe(brightness(0.05), saturation(-1));
 
 const kodakGold200 = () =>
   pipe(
@@ -80,7 +79,7 @@ const kodakGold200 = () =>
 const kodakFunSaver = () =>
   pipe(
     colorFilter([255, 235, 190, 0.1]), // Warm, slightly yellow cast
-    contrast(0.1),
+    //contrast(0.1),
     saturation(0.2),
     brightness(0.05),
     rgbAdjust([1.05, 1, 0.95]) // Enhance reds slightly
@@ -89,7 +88,7 @@ const kodakFunSaver = () =>
 const fujiQuickSnap = () =>
   pipe(
     colorFilter([220, 255, 220, 0.08]), // Slight green tint
-    contrast(0.1),
+    //contrast(0.1),
     saturation(0.15),
     brightness(0.05),
     rgbAdjust([0.95, 1.05, 1]) // Enhance greens slightly
@@ -98,7 +97,7 @@ const fujiQuickSnap = () =>
 const agfaVista400 = () =>
   pipe(
     colorFilter([240, 255, 240, 0.1]), // Green tint in shadows
-    contrast(0.2),
+    contrast(0.1),
     saturation(0.1),
     brightness(-0.05),
     rgbAdjust([0.95, 1.05, 0.95]) // Enhance greens, reduce reds and blues
@@ -107,7 +106,7 @@ const agfaVista400 = () =>
 const kodakUltraMax400 = () =>
   pipe(
     colorFilter([255, 230, 200, 0.1]), // Warm cast
-    contrast(0.15),
+    //contrast(0.05),
     saturation(0.2),
     brightness(0.05),
     rgbAdjust([1.1, 1, 0.9]) // Strong red emphasis, slight blue reduction
@@ -116,34 +115,34 @@ const kodakUltraMax400 = () =>
 const lomographyColor100 = () =>
   pipe(
     colorFilter([255, 220, 180, 0.15]), // Strong warm cast
-    contrast(0.25),
+    //contrast(0.08),
     saturation(0.35),
-    brightness(0.1),
+    //brightness(0.05),
     rgbAdjust([1.1, 1.05, 0.9]) // Enhance reds and greens, reduce blues
   );
 
 const fujifilmIndustrial100 = () =>
   pipe(
     colorFilter([200, 255, 255, 0.1]), // Cool, cyan cast
-    contrast(0.1),
+    //contrast(0.05),
     saturation(-0.05),
-    brightness(0.05),
+    //brightness(0.05),
     rgbAdjust([0.9, 1, 1.1]) // Enhance blues, reduce reds
   );
 
 const kodakGold200Warm = () =>
   pipe(
     colorFilter([255, 220, 180, 0.15]), // Stronger warm cast than original
-    contrast(0.15),
+    //contrast(0.08),
     saturation(0.2),
-    brightness(0.1),
+    //brightness(0.1),
     rgbAdjust([1.15, 1.05, 0.9]) // Strong red and slight green emphasis, reduce blues
   );
 
 const fujiSuperiaXTra400 = () =>
   pipe(
     colorFilter([240, 255, 240, 0.08]), // Slight green tint
-    contrast(0.2),
+    //contrast(0.09),
     saturation(0.25),
     brightness(0.05),
     rgbAdjust([0.95, 1.1, 1.05]) // Enhance greens and blues
@@ -152,7 +151,7 @@ const fujiSuperiaXTra400 = () =>
 const kodakEktachrome100 = () =>
   pipe(
     colorFilter([240, 240, 255, 0.05]), // Slight cool cast
-    contrast(0.2),
+    //contrast(0.08),
     saturation(0.15),
     brightness(0.05),
     rgbAdjust([1, 1, 1.1]) // Slight blue emphasis
@@ -161,18 +160,18 @@ const kodakEktachrome100 = () =>
 const polaroidOriginals = () =>
   pipe(
     colorFilter([255, 240, 220, 0.2]), // Strong warm cast
-    contrast(0.3),
+    //contrast(0.09),
     saturation(0.1),
-    brightness(0.15),
+    //brightness(0.15),
     rgbAdjust([1.1, 1, 0.9]) // Enhance reds, reduce blues
   );
 
 const disposableSummer = () =>
   pipe(
     colorFilter([255, 235, 180, 0.15]), // Warm, sunny cast
-    contrast(0.2),
+    //contrast(0.09),
     saturation(0.3),
-    brightness(0.1),
+    brightness(0.05),
     rgbAdjust([1.1, 1.05, 0.9]) // Enhance reds and greens, reduce blues for a summery feel
   );
 
@@ -180,7 +179,7 @@ const vintagePostcard = () =>
   pipe(
     sepia(0.3),
     colorFilter([255, 240, 220, 0.1]), // Slight warm cast
-    contrast(0.1),
+    //contrast(0.08),
     saturation(-0.2),
     brightness(0.05)
   );
@@ -188,16 +187,16 @@ const vintagePostcard = () =>
 const fauxInfrared = () =>
   pipe(
     colorFilter([255, 0, 150, 0.2]), // Strong magenta cast
-    contrast(0.4),
+    //contrast(0.1),
     saturation(-0.5),
-    brightness(0.1),
+    brightness(0.05),
     rgbAdjust([1.2, 0.8, 1]) // Enhance reds, reduce greens for faux infrared look
   );
 
 const crossProcessed = () =>
   pipe(
     colorFilter([0, 255, 255, 0.15]), // Cyan cast
-    contrast(0.3),
+    //contrast(0.1),
     saturation(0.4),
     brightness(0.05),
     rgbAdjust([0.9, 1.1, 1.1]) // Enhance greens and blues, reduce reds
@@ -208,14 +207,14 @@ const faded70s = () =>
     colorFilter([255, 200, 150, 0.15]), // Warm, slightly orange cast
     contrast(-0.1),
     saturation(-0.1),
-    brightness(0.15),
+    brightness(0.07),
     rgbAdjust([1.1, 1, 0.9]) // Enhance reds, reduce blues
   );
 
 const vintageChrome = () =>
   pipe(
     colorFilter([255, 240, 220, 0.1]), // Slight warm cast
-    contrast(0.15),
+    //contrast(0.1),
     saturation(0.1),
     brightness(0.05),
     rgbAdjust([1.05, 1, 0.95]) // Slight red emphasis, reduced blues
@@ -224,16 +223,16 @@ const vintageChrome = () =>
 const lomofi = () =>
   pipe(
     colorFilter([255, 220, 180, 0.1]), // Warm cast
-    contrast(0.3),
+    //contrast(0.1),
     saturation(0.5),
-    brightness(0.1),
+    brightness(0.05),
     rgbAdjust([1.1, 1.1, 0.9]) // Enhance reds and greens, reduce blues
   );
 
 const cinematic80s = () =>
   pipe(
     colorFilter([50, 130, 255, 0.1]), // Blue cast
-    contrast(0.15),
+    //contrast(0.1),
     saturation(0.1),
     brightness(-0.05),
     rgbAdjust([0.9, 1, 1.2]) // Enhance blues, reduce reds
@@ -242,18 +241,18 @@ const cinematic80s = () =>
 const goldenHours = () =>
   pipe(
     colorFilter([255, 200, 110, 0.2]), // Strong golden cast
-    contrast(0.1),
+    //contrast(0.07),
     saturation(0.1),
-    brightness(0.05),
+    //brightness(0.05),
     rgbAdjust([1.1, 1, 0.8]) // Enhance reds, reduce blues
   );
 
 const vintageNoir = () =>
   pipe(
     colorFilter([200, 180, 160, 0.1]), // Slight sepia tone
-    contrast(0.3),
+    //contrast(0.1),
     saturation(-0.8), // Near black and white
-    brightness(-0.1),
+    brightness(-0.07),
     rgbAdjust([1.1, 1, 0.9]) // Slight warmth
   );
 
@@ -261,7 +260,7 @@ const disposableGreenYellow = () =>
   pipe(
     colorFilter([245, 255, 230, 0.1]), // Slight yellow-green tint
     rgbAdjust([1, 1.1, 0.9]), // Increase green, decrease blue
-    contrast(0.1),
+    contrast(0.05),
     saturation(-0.1),
     brightness(-0.05), // Slightly darker for that disposable camera feel
     colorFilter([20, 255, 20, 0.05]), // Add a touch more green
